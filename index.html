@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>เกมเปรียบเทียบตัวเลข</title>
+<style>
+    :root{
+        --bg1:#ffeaf4;
+        --bg2:#eef7ff;
+        --card:#ffffff;
+        --primary:#ff6fa9;
+        --primary-dark:#e65390;
+        --secondary:#7d8bff;
+        --accent:#ffb84d;
+        --success:#33b679;
+        --danger:#ff6b6b;
+        --text:#3a3550;
+        --muted:#7a7490;
+        --shadow:0 18px 40px rgba(76, 54, 126, 0.12);
+        --radius:26px;
+    }
+    *{box-sizing:border-box}
+    body{
+        margin:0;
+        min-height:100vh;
+        font-family:"Trebuchet MS","Segoe UI",Tahoma,sans-serif;
+        color:var(--text);
+        background:
+            radial-gradient(circle at top left, #fff4cf 0%, transparent 30%),
+            radial-gradient(circle at top right, #ffd9ea 0%, transparent 28%),
+            linear-gradient(135deg, var(--bg1), var(--bg2));
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+    }
+    .app{
+        width:min(980px, 100%);
+        background:rgba(255,255,255,0.82);
+        backdrop-filter: blur(10px);
+        border:1px solid rgba(255,255,255,0.55);
+        border-radius:32px;
+        box-shadow:var(--shadow);
+        padding:24px;
+    }
+    .header{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:16px;
+        flex-wrap:wrap;
+        margin-bottom:18px;
+    }
+    .title-wrap{
+        text-align:left;
+    }
+    h1{
+        margin:0;
+        font-size:clamp(1.8rem, 4vw, 2.7rem);
+        line-height:1.1;
+    }
+    .subtitle{
+        margin-top:8px;
+        color:var(--muted);
+        font-size:1rem;
+    }
+    .pill{
+        background:linear-gradient(135deg,#fff,#ffe1ef);
+        color:var(--primary-dark);
+        padding:10px 16px;
+        border-radius:999px;
+        font-weight:700;
+        box-shadow:0 8px 18px rgba(230,83,144,0.12);
+    }
+    .grid{
+        display:grid;
+        grid-template-columns:repeat(12, 1fr);
+        gap:18px;
+    }
+    .panel{
+        grid-column:span 12;
+        background:var(--card);
+        border-radius:var(--radius);
+        padding:20px;
+        box-shadow:0 10px 24px rgba(58,53,80,0.07);
+    }
+    .panel.controls{grid-column:span 4;}
+    .panel.game{grid-column:span 8;}
+    .section-title{
+        margin:0 0 14px 0;
+        font-size:1.1rem;
+    }
+    .form-group{
+        margin-bottom:14px;
+        text-align:left;
+    }
+    label{
+        display:block;
+        margin-bottom:6px;
+        font-weight:700;
+    }
+    input, select{
+        width:100%;
+        padding:12px 14px;
+        border:2px solid #f0deea;
+        border-radius:16px;
+        font-size:1rem;
+        outline:none;
+        background:#fffafc;
+        color:var(--text);
+    }
+    input:focus, select:focus{
+        border-color:#ffb6d1;
+        box-shadow:0 0 0 4px rgba(255,111,169,0.10);
+    }
+    .stats{
+        display:grid;
+        grid-template-columns:repeat(2, 1fr);
+        gap:12px;
+        margin-top:10px;
+    }
+    .stat-box{
+        background:linear-gradient(135deg,#fff7fb,#f5f8ff);
+        border:1px solid #f1e9f0;
+        border-radius:20px;
+        padding:14px;
+        text-align:center;
+    }
+    .stat-label{
+        font-size:0.92rem;
+        color:var(--muted);
+        margin-bottom:6px;
+    }
+    .stat-value{
+        font-size:1.4rem;
+        font-weight:800;
+    }
+    .timer-ring{
+        margin:4px auto 18px;
+        width:136px;
+        height:136px;
+        border-radius:50%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:conic-gradient(var(--primary) calc(var(--progress, 100) * 1%), #f3dde7 0);
+        padding:10px;
+        transition:all .25s ease;
+    }
+    .timer-inner{
+        width:100%;
+        height:100%;
+        border-radius:50%;
+        background:white;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        box-shadow: inset 0 0 0 1px #f2e5ef;
+    }
+    .timer-inner small{color:var(--muted)}
+    .timer-inner strong{font-size:2rem}
+    .question-card{
+        background:linear-gradient(135deg,#fff8fc,#f7fbff);
+        border:1px solid #f2e7f0;
+        border-radius:28px;
+        padding:18px;
+    }
+    .question-title{
+        font-weight:800;
+        margin-bottom:18px;
+        color:#5a5072;
+    }
+    .options{
+        display:grid;
+        grid-template-columns:repeat(2, 1fr);
+        gap:18px;
+    }
+    .option-card{
+        min-height:170px;
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:center;
+        border-radius:26px;
+        padding:18px;
+        background:#fff;
+        border:3px solid #f1e5ee;
+        box-shadow:0 12px 26px rgba(87,67,119,0.08);
+        transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        cursor:pointer;
+        user-select:none;
+    }
+    .option-card:hover{
+        transform:translateY(-3px) scale(1.01);
+        border-color:#ffbfd7;
+        box-shadow:0 16px 30px rgba(87,67,119,0.13);
+    }
+    .option-label{
+        color:var(--muted);
+        font-size:.95rem;
+        margin-bottom:10px;
+        font-weight:700;
+    }
+    .option-text{
+        font-size:clamp(1.6rem, 4vw, 2.4rem);
+        font-weight:900;
+        line-height:1.2;
+        word-break:break-word;
+    }
+    .action-row{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        justify-content:center;
+        margin-top:18px;
+    }
+    button{
+        border:none;
+        border-radius:18px;
+        padding:14px 20px;
+        font-size:1rem;
+        font-weight:800;
+        cursor:pointer;
+        transition:transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+    }
+    button:hover{transform:translateY(-2px)}
+    .btn-primary{
+        background:linear-gradient(135deg,var(--primary),#ff8d74);
+        color:white;
+        box-shadow:0 12px 22px rgba(255,111,169,0.28);
+    }
+    .btn-secondary{
+        background:linear-gradient(135deg,#8f9dff,#7d8bff);
+        color:white;
+        box-shadow:0 12px 22px rgba(125,139,255,0.22);
+    }
+    .btn-soft{
+        background:linear-gradient(135deg,#fff3da,#ffe6ae);
+        color:#7a5712;
+    }
+    .feedback{
+        min-height:32px;
+        margin-top:14px;
+        font-size:1.05rem;
+        font-weight:800;
+    }
+    .summary{
+        margin-top:18px;
+        background:linear-gradient(135deg,#fff7fb,#fffdf7);
+        border:1px solid #f2e5ee;
+        border-radius:24px;
+        padding:18px;
+        display:none;
+    }
+    .summary h3{
+        margin-top:0;
+        margin-bottom:14px;
+    }
+    .summary-grid{
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+    }
+    .summary-item{
+        background:#fff;
+        border-radius:18px;
+        padding:14px;
+        border:1px solid #f4e8ef;
+    }
+    .summary-item strong{
+        display:block;
+        font-size:1.25rem;
+        margin-top:4px;
+    }
+    .scoreboard{
+        margin-top:20px;
+        overflow:auto;
+    }
+    table{
+        width:100%;
+        border-collapse:collapse;
+        overflow:hidden;
+        border-radius:20px;
+        background:white;
+    }
+    th, td{
+        padding:12px 10px;
+        border-bottom:1px solid #f2e8ef;
+        text-align:center;
+        white-space:nowrap;
+    }
+    th{
+        background:linear-gradient(135deg,#fff0f7,#eef4ff);
+        color:#5a5072;
+    }
+    tr:last-child td{border-bottom:none}
+    .empty{
+        color:var(--muted);
+        margin-top:10px;
+        text-align:center;
+    }
+    .footer-note{
+        margin-top:12px;
+        color:var(--muted);
+        font-size:.95rem;
+        text-align:center;
+    }
+    
+    .level-btn{
+        flex:1;
+        min-width:0;
+        padding:14px 10px;
+        font-size:1rem;
+        white-space:nowrap;
+    }
+    .active-level{
+        outline:4px solid rgba(255,111,169,0.22);
+        transform:translateY(-1px);
+    }
+
+    @media (max-width:860px){
+        .panel.controls, .panel.game{grid-column:span 12;}
+    }
+    @media (max-width:640px){
+        .options{grid-template-columns:1fr;}
+        .summary-grid{grid-template-columns:1fr;}
+        .stats{grid-template-columns:1fr 1fr;}
+        .app{padding:16px}
+        .panel{padding:16px}
+    }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="title-wrap">
+            <h1>🎮 เกมเลือกฝั่งที่มากกว่า</h1>
+            <div class="subtitle">เปรียบเทียบตัวเลขและโจทย์คำนวณ ภายในเวลา 30 วินาที</div>
+        </div>
+        <div class="pill" id="bestScore">🏆 Best Score: 0</div>
+    </div>
+
+    <div class="grid">
+        <div class="panel controls">
+            <h2 class="section-title">ข้อมูลผู้เล่น</h2>
+
+            <div class="form-group">
+                <label for="playerName">👤 ชื่อผู้เล่น</label>
+                <input type="text" id="playerName" placeholder="กรอกชื่อของคุณ">
+            </div>
+
+            <div class="form-group">
+                <label for="playDate">📅 วันที่เล่น</label>
+                <input type="date" id="playDate">
+            </div>
+
+            <div class="form-group">
+                <label for="level">⭐ ระดับเกม</label>
+                
+
+<div id="levelButtons" style="display:flex; gap:10px; flex-wrap:nowrap; width:100%;">
+    <button class="btn-secondary level-btn active-level" id="btn-easy" onclick="setLevel('easy')">🟢 ง่าย</button>
+    <button class="btn-secondary level-btn" id="btn-medium" onclick="setLevel('medium')">🟡 ปานกลาง</button>
+    <button class="btn-secondary level-btn" id="btn-hard" onclick="setLevel('hard')">🔴 ยาก</button>
+</div>
+<div id="selectedLevel" style="margin-top:10px; font-weight:bold;">ระดับ: ง่าย</div>
+
+
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">✅ ถูก</div>
+                    <div class="stat-value" id="correctCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">❌ ผิด</div>
+                    <div class="stat-value" id="wrongCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">📌 ข้อ</div>
+                    <div class="stat-value" id="questionCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">⚡ เฉลี่ย/ข้อ</div>
+                    <div class="stat-value" id="avgSpeed">0.00</div>
+                </div>
+            </div>
+
+            <div class="footer-note">เมื่อเริ่มเกม ระบบจะจับเวลา 30 วินาทีและสรุปผลให้อัตโนมัติ</div>
+        </div>
+
+        <div class="panel game">
+            <div class="timer-ring" id="timerRing" style="--progress: 100;">
+                <div class="timer-inner">
+                    <small>เวลาที่เหลือ</small>
+                    <strong id="timer">30</strong>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="question-title">เลือกฝั่งที่มีค่ามากกว่า</div>
+
+                <div class="options" id="gameArea">
+                    <div class="option-card" onclick="checkAnswer('left')">
+                        <div class="option-label">ฝั่งซ้าย</div>
+                        <div class="option-text" id="left">?</div>
+                    </div>
+                    <div class="option-card" onclick="checkAnswer('right')">
+                        <div class="option-label">ฝั่งขวา</div>
+                        <div class="option-text" id="right">?</div>
+                    </div>
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <div class="action-row">
+                    <button class="btn-primary" onclick="startGame()">เริ่มเกม</button>
+                    <button class="btn-secondary" onclick="restartGame()">เล่นอีกครั้ง</button>
+                    <button class="btn-soft" onclick="clearScores()">ล้างตารางคะแนน</button>
+                </div>
+            </div>
+
+            <div class="summary" id="summaryBox">
+                <h3>📊 สรุปผลการเล่น</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">👤 ชื่อผู้เล่น<strong id="sumName">-</strong></div>
+                    <div class="summary-item">📅 วันที่เล่น<strong id="sumDate">-</strong></div>
+                    <div class="summary-item">✅ ตอบถูก<strong id="sumCorrect">0</strong></div>
+                    <div class="summary-item">❌ ตอบผิด<strong id="sumWrong">0</strong></div>
+                    <div class="summary-item">📌 ทำทั้งหมด<strong id="sumTotal">0</strong></div>
+                    <div class="summary-item">⚡ ความเร็วเฉลี่ยต่อข้อ<strong id="sumSpeed">0.00 วินาที</strong></div>
+                </div>
+            </div>
+
+            <div class="scoreboard">
+                <table id="scoreTable">
+                    <thead>
+                        <tr>
+                            <th>ชื่อ</th>
+                            <th>วันที่</th>
+                            <th>ระดับ</th>
+                            <th>ถูก</th>
+                            <th>ผิด</th>
+                            <th>รวม</th>
+                            <th>เฉลี่ย/ข้อ</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div class="empty" id="emptyState">ยังไม่มีบันทึกคะแนน</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+let currentLevel = 'easy';
+
+function playVoice(text){
+    try{
+        if(!('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'th-TH';
+        utter.rate = 0.95;
+        utter.pitch = 1.0;
+        window.speechSynthesis.speak(utter);
+    }catch(e){}
+}
+
+function setLevel(level){
+    currentLevel = level;
+    let label = level === 'easy' ? 'ง่าย' : level === 'medium' ? 'ปานกลาง' : 'ยาก';
+    document.getElementById('selectedLevel').innerText = 'ระดับ: ' + label;
+
+    document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active-level'));
+    const activeBtn = document.getElementById('btn-' + level);
+    if(activeBtn) activeBtn.classList.add('active-level');
+}
+
+
+let leftValue = 0;
+let rightValue = 0;
+let correct = 0;
+let wrong = 0;
+let total = 0;
+let time = 30;
+let timerInterval = null;
+let gameRunning = false;
+const GAME_DURATION = 30;
+
+const hardExpressions = [
+    {t:"8 + 4 × 2", v:8 + 4 * 2},
+    {t:"(9 - 3) × 2", v:(9 - 3) * 2},
+    {t:"16 ÷ 2 + 5", v:16 / 2 + 5},
+    {t:"18 - 6 ÷ 2", v:18 - 6 / 2},
+    {t:"(12 + 8) ÷ 4", v:(12 + 8) / 4},
+    {t:"7 × 3 - 4", v:7 * 3 - 4},
+    {t:"24 ÷ 3 + 6", v:24 / 3 + 6},
+    {t:"(15 - 5) + 8", v:(15 - 5) + 8},
+    {t:"6 × 2 + 7", v:6 * 2 + 7},
+    {t:"20 ÷ 5 × 3", v:20 / 5 * 3},
+    {t:"(14 + 4) - 9", v:(14 + 4) - 9},
+    {t:"3 × 4 + 6", v:3 * 4 + 6},
+    {t:"25 ÷ 5 + 9", v:25 / 5 + 9},
+    {t:"30 ÷ 6 + 2", v:30 / 6 + 2},
+    {t:"(10 + 6) ÷ 2", v:(10 + 6) / 2}
+];
+
+function setTodayDefault(){
+    const input = document.getElementById("playDate");
+    if(!input.value){
+        const d = new Date();
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth()+1).padStart(2,'0');
+        const dd = String(d.getDate()).padStart(2,'0');
+        input.value = `${yyyy}-${mm}-${dd}`;
+    }
+}
+
+function updateStats(){
+    document.getElementById("correctCount").innerText = correct;
+    document.getElementById("wrongCount").innerText = wrong;
+    document.getElementById("questionCount").innerText = total;
+    const avg = total > 0 ? (GAME_DURATION / total).toFixed(2) : "0.00";
+    document.getElementById("avgSpeed").innerText = avg;
+}
+
+function updateTimerUI(){
+    document.getElementById("timer").innerText = time;
+    const progress = (time / GAME_DURATION) * 100;
+    document.getElementById("timerRing").style.setProperty("--progress", progress);
+}
+
+function getLevelLabel(level){
+    if(level === "easy") return "ง่าย";
+    if(level === "medium") return "ปานกลาง";
+    return "ยาก";
+}
+
+function speakBeep(){
+    try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = 720;
+        gain.gain.value = 0.04;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+    }catch(e){}
+}
+
+function startGame(){
+    clearInterval(timerInterval);
+    setTodayDefault();
+    correct = 0;
+    wrong = 0;
+    total = 0;
+    time = GAME_DURATION;
+    gameRunning = true;
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("summaryBox").style.display = "none";
+    updateStats();
+    updateTimerUI();
+    generateQuestion();
+
+    timerInterval = setInterval(() => {
+        time--;
+        updateTimerUI();
+
+        if(time <= 5 && time > 0){
+            speakBeep();
+        }
+
+        if(time <= 0){
+            clearInterval(timerInterval);
+            endGame();
+        }
+    }, 1000);
+}
+
+function restartGame(){
+    startGame();
+}
+
+function randomInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generateQuestion(){
+    const level = currentLevel;
+
+    if(level === "easy"){
+        do{
+            leftValue = randomInt(0, 30);
+            rightValue = randomInt(0, 30);
+        } while(leftValue === rightValue);
+
+        document.getElementById("left").innerText = leftValue;
+        document.getElementById("right").innerText = rightValue;
+
+    } else if(level === "medium"){
+        let a,b,c,d,leftText,rightText;
+        do{
+            a = randomInt(0, 15);
+            b = randomInt(0, 15);
+            c = randomInt(0, 15);
+            d = randomInt(0, 15);
+
+            if(Math.random() < 0.5){
+                leftValue = a + b;
+                leftText = `${a} + ${b}`;
+            } else {
+                const high = Math.max(a,b), low = Math.min(a,b);
+                leftValue = high - low;
+                leftText = `${high} - ${low}`;
+            }
+
+            if(Math.random() < 0.5){
+                rightValue = c + d;
+                rightText = `${c} + ${d}`;
+            } else {
+                const high2 = Math.max(c,d), low2 = Math.min(c,d);
+                rightValue = high2 - low2;
+                rightText = `${high2} - ${low2}`;
+            }
+        } while(leftValue === rightValue);
+
+        document.getElementById("left").innerText = leftText;
+        document.getElementById("right").innerText = rightText;
+
+    } else {
+        let leftExp, rightExp;
+        do{
+            leftExp = hardExpressions[Math.floor(Math.random() * hardExpressions.length)];
+            rightExp = hardExpressions[Math.floor(Math.random() * hardExpressions.length)];
+        } while(leftExp.v === rightExp.v);
+
+        leftValue = leftExp.v;
+        rightValue = rightExp.v;
+        document.getElementById("left").innerText = leftExp.t;
+        document.getElementById("right").innerText = rightExp.t;
+    }
+}
+
+function checkAnswer(side){
+    if(!gameRunning) return;
+
+    total++;
+    const isCorrect =
+        (leftValue > rightValue && side === "left") ||
+        (rightValue > leftValue && side === "right");
+
+    if(isCorrect){
+        correct++;
+        document.getElementById("feedback").innerText = "✅ ถูกต้อง!";
+        document.getElementById("feedback").style.color = "#24995e";
+        playVoice("ถูกต้อง");
+    } else {
+        wrong++;
+        document.getElementById("feedback").innerText = "❌ ยังไม่ถูก";
+        document.getElementById("feedback").style.color = "#d84b4b";
+        playVoice("ผิด");
+    }
+
+    updateStats();
+    setTimeout(() => {
+        if(gameRunning){
+            generateQuestion();
+            document.getElementById("feedback").innerText = "";
+        }
+    }, 250);
+}
+
+function endGame(){
+    gameRunning = false;
+    document.getElementById("left").innerText = "หมดเวลา";
+    document.getElementById("right").innerText = "สรุปผล";
+    document.getElementById("feedback").innerText = "⏰ จบเกมแล้ว";
+    document.getElementById("feedback").style.color = "#7d5cff";
+    playVoice("หมดเวลา");
+
+    const name = document.getElementById("playerName").value.trim() || "ไม่ระบุชื่อ";
+    const date = document.getElementById("playDate").value || "-";
+    const level = getLevelLabel(document.getElementById("level").value);
+    const avg = total > 0 ? (GAME_DURATION / total).toFixed(2) : "0.00";
+
+    document.getElementById("sumName").innerText = name;
+    document.getElementById("sumDate").innerText = date;
+    document.getElementById("sumCorrect").innerText = correct;
+    document.getElementById("sumWrong").innerText = wrong;
+    document.getElementById("sumTotal").innerText = total;
+    document.getElementById("sumSpeed").innerText = `${avg} วินาที`;
+    document.getElementById("summaryBox").style.display = "block";
+
+    saveScore({name, date, level, correct, wrong, total, avg});
+    updateBestScore();
+}
+
+function saveScore(score){
+    const scores = JSON.parse(localStorage.getItem("compareGameScores") || "[]");
+    scores.unshift(score);
+    localStorage.setItem("compareGameScores", JSON.stringify(scores.slice(0, 20)));
+    renderScores();
+}
+
+function renderScores(){
+    const tbody = document.querySelector("#scoreTable tbody");
+    const empty = document.getElementById("emptyState");
+    const scores = JSON.parse(localStorage.getItem("compareGameScores") || "[]");
+
+    tbody.innerHTML = "";
+
+    if(scores.length === 0){
+        empty.style.display = "block";
+        return;
+    }
+
+    empty.style.display = "none";
+
+    scores.forEach(score => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${score.name}</td>
+            <td>${score.date}</td>
+            <td>${score.level}</td>
+            <td>${score.correct}</td>
+            <td>${score.wrong}</td>
+            <td>${score.total}</td>
+            <td>${score.avg}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateBestScore(){
+    const scores = JSON.parse(localStorage.getItem("compareGameScores") || "[]");
+    const best = scores.reduce((max, s) => Math.max(max, Number(s.correct) || 0), 0);
+    document.getElementById("bestScore").innerText = `🏆 Best Score: ${best}`;
+}
+
+function clearScores(){
+    localStorage.removeItem("compareGameScores");
+    renderScores();
+    updateBestScore();
+}
+
+setTodayDefault();
+renderScores();
+updateBestScore();
+updateStats();
+updateTimerUI();
+</script>
+</body>
+</html>
